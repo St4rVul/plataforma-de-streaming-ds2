@@ -12,7 +12,7 @@ export class PaymentService {
     private usersService: UsersService,
   ) {
     this.stripe = new Stripe(this.configService.get('STRIPE_SECRET_KEY'), {
-      apiVersion: '2023-10-16',
+      apiVersion: '2025-03-31.basil',
     });
   }
 
@@ -100,5 +100,9 @@ export class PaymentService {
         // Manejar el pago exitoso
         break;
     }
+  }
+
+  async constructWebhookEvent(rawBody: Buffer, signature: string, secret: string) {
+    return this.stripe.webhooks.constructEvent(rawBody, signature, secret);
   }
 } 

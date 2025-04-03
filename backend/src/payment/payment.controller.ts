@@ -2,6 +2,8 @@ import { Controller, Post, Body, UseGuards, Get, Param, Headers } from '@nestjs/
 import { PaymentService } from './payment.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { User } from '../users/entities/user.entity';
+import { GetUser } from '../auth/decorators/user.decorator';
+
 
 @Controller('payment')
 @UseGuards(JwtAuthGuard)
@@ -9,14 +11,14 @@ export class PaymentController {
   constructor(private paymentService: PaymentService) {}
 
   @Post('create-customer')
-  async createCustomer(@Body() body: { email: string }, @User() user: any) {
+  async createCustomer(@Body() body: { email: string }, @GetUser() user: User) {
     return this.paymentService.createCustomer(user.id, body.email);
   }
 
   @Post('create-subscription')
   async createSubscription(
     @Body() body: { priceId: string; paymentMethodId: string },
-    @User() user: any,
+    @GetUser() user: User,
   ) {
     return this.paymentService.createSubscription(
       user.stripeCustomerId,
@@ -40,7 +42,7 @@ export class PaymentController {
     @Headers('stripe-signature') signature: string,
     @Body() rawBody: Buffer,
   ) {
-    const event = this.paymentService.stripe.webhooks.constructEvent(
+    const event = await this.paymentService.constructWebhookEvent(
       rawBody,
       signature,
       process.env.STRIPE_WEBHOOK_SECRET,
