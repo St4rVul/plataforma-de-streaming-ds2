@@ -1,34 +1,23 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import {
-  getAuth,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  User,
-} from "firebase/auth";
-import { initializeApp } from "firebase/app";
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { authService } from "../services/authService";
 
-const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.REACT_APP_FIREBASE_APP_ID,
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+interface User {
+  email: string;
+  token: string;
+}
 
 interface AuthContextType {
   currentUser: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
   currentUser: null,
   loading: true,
   login: async () => {},
+  logout: () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -39,23 +28,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const login = async (email: string, password: string): Promise<void> => {
-    await signInWithEmailAndPassword(auth, email, password);
+  useEffect(() => {
+    const token = authService.getToken();
+    if (token) {
+      setCurrentUser({ email: "", token });
+    }
+    setLoading(false);
+  }, []);
+
+  const login = async (email: string, password: string) => {
+    const token = await authService.login(email, password);
+    setCurrentUser({ email, token });
   };
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-      setLoading(false);
-    });
-
-    return unsubscribe;
-  }, []);
+  const logout = () => {
+    authService.logout();
+    setCurrentUser(null);
+  };
 
   const value = {
     currentUser,
     loading,
     login,
+    logout,
   };
 
   return (
