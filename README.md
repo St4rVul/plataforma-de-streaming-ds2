@@ -7,7 +7,7 @@ Una plataforma de streaming moderna construida con React.js, TypeScript, NestJS 
 - Autenticación con Firebase (email, Google, Facebook, Apple)
 - Reproducción de video adaptativa (HLS/MPEG-DASH)
 - Sistema de suscripciones con Stripe
-- Almacenamiento de archivos en AWS S3
+- Almacenamiento de archivos en FireBase
 - Panel de administración
 - Soporte para subtítulos y audio multilingüe
 - Sistema de recomendaciones
@@ -38,7 +38,7 @@ Una plataforma de streaming moderna construida con React.js, TypeScript, NestJS 
 
 - Node.js (v16 o superior)
 - PostgreSQL
-- Cuenta de AWS con acceso a S3
+- Cuenta de FireBase
 - Cuenta de Stripe
 - Proyecto de Firebase
 
